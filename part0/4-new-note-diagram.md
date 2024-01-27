@@ -10,9 +10,7 @@ sequenceDiagram
     activate browser
 
     browser->>server: POST https://studies.cs.helsinki.fi/exampleapp/new_note
-    
     activate server
-    deactivate browser
     Note right of browser: Form data encoded in URL -- "note: This is a note"
 
     server-->>browser: 302 Found -- redirect to /notes (reload page)
