@@ -40,11 +40,31 @@ const Persons = ({ persons, onClickDelete }) => {
   );
 };
 
+const SuccessMsg = ({ msg }) => {
+  if (!msg) return;
+  return (
+    <div className="success">
+      <p>{msg}</p>
+    </div>
+  );
+};
+
+const ErrorMsg = ({ msg }) => {
+  if (!msg) return;
+  return (
+    <div className="error">
+      <p>{msg}</p>
+    </div>
+  );
+};
+
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [search, setSearch] = useState("");
+  const [successMsg, setSuccessMsg] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
 
   useEffect(() => {
     phonebook.getAll().then((response) => setPersons(response));
@@ -55,6 +75,15 @@ const App = () => {
   const handleSearchChange = (event) => setSearch(event.target.value);
 
   const isNameInPhonebook = (name) => persons.map((p) => p.name).includes(name);
+
+  const displaySuccessMsg = (msg) => {
+    setSuccessMsg(msg);
+    setTimeout(() => setSuccessMsg(null), 5000);
+  };
+  const displayErrorMsg = (msg) => {
+    setErrorMsg(msg);
+    setTimeout(() => setErrorMsg(null), 5000);
+  };
 
   const createContact = (event) => {
     event.preventDefault();
@@ -71,34 +100,64 @@ const App = () => {
       name: newName,
       number: newNumber,
     };
-    phonebook.create(newContact).then((response) => {
-      setPersons(persons.concat(response));
-      setNewName("");
-      setNewNumber("");
-    });
+    phonebook
+      .create(newContact)
+      .then((response) => {
+        setPersons(persons.concat(response));
+        setNewName("");
+        setNewNumber("");
+        displaySuccessMsg(`Successfully added ${response.name} to phonebook`);
+      })
+      .catch((error) => {
+        displayErrorMsg(
+          `An error occurred while trying to add ${newName} to phonebook: ${error.message}`
+        );
+      });
   };
 
   const updateContact = (name, newNumber) => {
     const existingContact = persons.find((person) => person.name === name);
+    if (!existingContact)
+      displayErrorMsg(`${name} does not exist in phonebook`);
     const { id } = existingContact;
     if (existingContact.number !== newNumber) {
       const newContact = { ...existingContact, number: newNumber };
-      phonebook.update(id, newContact).then((response) => {
-        setPersons(
-          persons.filter((person) => person.id !== id).concat(response)
-        );
-        setNewName("");
-        setNewNumber("");
-      });
+      phonebook
+        .update(id, newContact)
+        .then((response) => {
+          setPersons(
+            persons.filter((person) => person.id !== id).concat(response)
+          );
+          setNewName("");
+          setNewNumber("");
+          displaySuccessMsg(`Successfully updated number for ${name}`);
+        })
+        .catch((error) => {
+          displayErrorMsg(
+            `An error occurred while trying to update contact for ${name}: ${error.message}`
+          );
+        });
     }
   };
 
   const deleteContact = (id) => {
     const personToDelete = persons.find((person) => person.id === id);
+    if (!personToDelete)
+      displayErrorMsg(`Person with id ${id} does not exist in phonebook`);
     if (window.confirm(`Delete ${personToDelete.name}?`)) {
-      phonebook.deleteContact(id).then(() => {
-        setPersons(persons.filter((person) => person.id !== id));
-      });
+      phonebook
+        .deleteContact(id)
+        .then(() => {
+          setPersons(persons.filter((person) => person.id !== id));
+          displaySuccessMsg(
+            `Successfully deleted contact info for ${personToDelete.name}`
+          );
+        })
+        .catch((error) => {
+          displayErrorMsg(
+            `An error occurred while trying to delete contact info for ${personToDelete.name}: ${error.message}`
+          );
+        });
     }
   };
 
@@ -108,7 +167,9 @@ const App = () => {
 
   return (
     <div>
-      <h2>Phonebook</h2>
+      <h1>Phonebook</h1>
+      <SuccessMsg msg={successMsg} />
+      <ErrorMsg msg={errorMsg} />
       <Search search={search} handleSearchChange={handleSearchChange} />
 
       <h2>New Contact</h2>

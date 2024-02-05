@@ -1,0 +1,24 @@
+.success,
+.error {
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.success {
+  color: green;
+  border: solid green;
+  background-color: lightgreen;
+}
+
+.error {
+  color: red;
+  border: solid red;
+  background-color: lightpink;
+}
+
+.success p,
+.error p {
+  margin: 0;
+  font-weight: 600;
+}
