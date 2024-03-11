@@ -109,8 +109,10 @@ const App = () => {
         displaySuccessMsg(`Successfully added ${response.name} to phonebook`);
       })
       .catch((error) => {
+        console.log(error);
+        const message = error.response.data.error ?? error.message;
         displayErrorMsg(
-          `An error occurred while trying to add ${newName} to phonebook: ${error.message}`
+          `An error occurred while trying to add ${newName} to phonebook: ${message}`
         );
       });
   };
@@ -133,8 +135,10 @@ const App = () => {
           displaySuccessMsg(`Successfully updated number for ${name}`);
         })
         .catch((error) => {
+          console.log(error);
+          const message = error.response.data.error ?? error.message;
           displayErrorMsg(
-            `An error occurred while trying to update contact for ${name}: ${error.message}`
+            `An error occurred while trying to add ${newName} to phonebook: ${message}`
           );
         });
     }
